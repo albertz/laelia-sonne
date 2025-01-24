@@ -15,7 +15,7 @@ dt = 0
 
 
 class Character:
-    Size = 100
+    Size = 512
 
     def __init__(self, gfx_path: str):
         self.gfx_path = gfx_path
@@ -35,7 +35,11 @@ class Character:
 
     def draw(self):
         pos = get_random_position()
-        screen.blit(self.gfx, pos - pygame.Vector2(self.gfx.get_width() / 2, self.gfx.get_height() / 2))
+        size = 10 + (pos.y / screen.get_height()) * 300.
+        w, h = self.gfx.get_width(), self.gfx.get_height()
+        long_side = max(w, h)
+        gfx = pygame.transform.smoothscale(self.gfx, (size * w / long_side, size * h / long_side))
+        screen.blit(gfx, pos - pygame.Vector2(gfx.get_width() / 2, gfx.get_height() / 2))
 
 
 class Area:
@@ -143,7 +147,7 @@ while running:
         i = random.randint(0, len(players) - 1)
         players[i].draw()
 
-    snow.draw()
+    # snow.draw()
 
     # flip() the display to put your work on screen
     pygame.display.flip()
