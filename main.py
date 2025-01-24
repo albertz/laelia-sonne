@@ -17,9 +17,8 @@ dt = 0
 class Character:
     Size = 100
 
-    def __init__(self, name, pos: pygame.Vector2, gfx_path: str):
-        self.name = name
-        self.pos = pos
+    def __init__(self, gfx_path: str):
+        self.gfx_path = gfx_path
         self.gfx = pygame.image.load(gfx_path)
         w, h = self.gfx.get_width(), self.gfx.get_height()
         long_side = max(w, h)
@@ -34,53 +33,9 @@ class Character:
                     color = (255, 255, 255, 0)
                 self.gfx.set_at((x, y), color)
 
-    def handle_keys(self, keys):
-        if keys[pygame.K_UP]:
-            self.move(0, -300 * dt)
-        if keys[pygame.K_DOWN]:
-            self.move(0, 300 * dt)
-        if keys[pygame.K_LEFT]:
-            self.move(-300 * dt, 0)
-        if keys[pygame.K_RIGHT]:
-            self.move(300 * dt, 0)
-
-    def handle_ai_move_towards(self, target_pos: pygame.Vector2):
-        # Move towards target
-        direction = target_pos - self.pos
-        if direction.length() < 100:
-            return
-        direction.normalize_ip()
-        self.move(direction.x * 200 * dt, direction.y * 200 * dt)
-
-    def move(self, x, y):
-        self.pos.x += x
-        self.pos.y += y
-
-    def update_player(self):
-        if (self.pos - santa.pos).length() < 100:
-            santa.caught_dt += dt
-            if santa.caught_dt > 1:
-                game_score.score += 1
-                self.pos = get_random_position()
-                santa.reset()
-
     def draw(self):
-        # Draw gfx
-        screen.blit(self.gfx, self.pos - pygame.Vector2(self.gfx.get_width() / 2, self.gfx.get_height() / 2))
-
-        # Check if player out of screen (left,right,top,down)
-        if self.pos.x < 0 or self.pos.x > screen.get_width() or self.pos.y < 0 or self.pos.y > screen.get_height():
-            # Print arrow in that direction on the edge of the screen
-            edge_pos = pygame.Vector2(self.pos)
-            if self.pos.x < 0:
-                edge_pos.x = 0
-            elif self.pos.x > screen.get_width():
-                edge_pos.x = screen.get_width()
-            if self.pos.y < 0:
-                edge_pos.y = 0
-            elif self.pos.y > screen.get_height():
-                edge_pos.y = screen.get_height()
-            pygame.draw.circle(screen, "gray", edge_pos, 5)
+        pos = get_random_position()
+        screen.blit(self.gfx, pos - pygame.Vector2(self.gfx.get_width() / 2, self.gfx.get_height() / 2))
 
 
 class Area:
@@ -96,17 +51,10 @@ class Area:
 
 
 players = [
-    Character("Girl", pygame.Vector2(100, 300), "assets/girl1.jpeg"),
-    Character("Pippi Longstocking", pygame.Vector2(100, 200), "assets/pippi3.jpeg"),
-    Character("Mama", pygame.Vector2(100, 100), "assets/girl2.jpeg"),
-    Character("Girls", pygame.Vector2(200, 200), "assets/girls.jpeg"),
-    # Character("Yellow mouse", pygame.Vector2(100, 100), "assets/mouse3.jpeg"),
-    # Character("Elephant", pygame.Vector2(300, 300), "assets/elephant1.jpeg"),
-    # Character("Fat mouse", pygame.Vector2(200, 200), "assets/mouse4.jpeg"),
-    # Character("Med mouse", pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2), "assets/mouse2.jpeg"),
-    # Character("Duck", pygame.Vector2(500, 100), "assets/duck1.jpeg"),
-    # Character("Dragon", pygame.Vector2(600, 200), "assets/dragon1.jpeg"),
-    # Character("Black socks", pygame.Vector2(500, 100), "assets/socks.jpeg"),
+    Character("assets/zebra.jpeg"),
+    Character("assets/tiger.jpeg"),
+    Character("assets/giraffe2.jpeg"),
+    Character("assets/pferd1.jpeg"),
 ]
 areas = [
     Area("sky", pygame.Vector2(0, 0), pygame.Vector2(screen.get_width(), screen.get_height() / 2), "skyblue"),
@@ -170,52 +118,7 @@ class Sun:
 sun = Sun()
 
 
-class SantaClaus(Character):
-    Size = 200
-
-    def __init__(self):
-        super().__init__(
-            "Santa Claus",
-            pygame.Vector2(screen.get_width() * 0.7, screen.get_height() * 0.25),
-            "assets/santaClaus.jpeg",
-        )
-        angle = random.random() * math.pi * 2
-        self.direction = pygame.Vector2(math.cos(angle), math.sin(angle))
-        self.caught_dt = 0.0
-
-    def reset(self):
-        self.pos = pygame.Vector2(random.random() * screen.get_width(), random.random() * screen.get_height() * 0.5)
-        angle = random.random() * math.pi * 2
-        self.direction = pygame.Vector2(math.cos(angle), math.sin(angle))
-        self.caught_dt = 0.0
-
-    def update(self):
-        self.move(self.direction.x * 100 * dt, self.direction.y * 100 * dt)
-        if self.pos.x < 0 or self.pos.x > screen.get_width():
-            self.direction.x *= -1
-        if self.pos.y < 0 or self.pos.y > screen.get_height():
-            self.direction.y *= -1
-
-    def draw(self):
-        super().draw()
-        if self.caught_dt > 0:
-            pygame.draw.circle(screen, "red", self.pos, self.caught_dt * 100, width=10)
-
-
-santa = SantaClaus()
-
-
-class Score:
-    def __init__(self):
-        self.score = 0
-
-    def draw(self):
-        text = font.render(f"Score: {self.score}", True, "black")
-        screen.blit(text, (10, 10))
-
-
 font = pygame.font.Font(None, 36)
-game_score = Score()
 
 
 while running:
@@ -226,33 +129,23 @@ while running:
             running = False
 
     keys = pygame.key.get_pressed()
-    # human_player.handle_keys(keys)
-
-    players[0].handle_keys(keys)
-
-    for i in range(1, len(players)):
-        target_pos = players[i - 1].pos.copy()
-        players[i].handle_ai_move_towards(target_pos)
-
-    players[0].update_player()
+    if keys[pygame.K_ESCAPE]:
+        running = False
 
     snow.update()
-    santa.update()
 
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("white")
+    # screen.fill("white")
 
     for area in areas:
         area.draw()
     sun.draw()
 
-    santa.draw()
-
-    for player in players:
-        player.draw()
+    if keys[pygame.K_SPACE]:
+        i = random.randint(0, len(players) - 1)
+        players[i].draw()
 
     snow.draw()
-    game_score.draw()
 
     # flip() the display to put your work on screen
     pygame.display.flip()
