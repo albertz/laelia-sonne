@@ -120,28 +120,26 @@ sun = Sun()
 
 font = pygame.font.Font(None, 36)
 
+for area in areas:
+    area.draw()
+sun.draw()
 
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
+    add_char = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_ESCAPE]:
-        running = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            add_char = True
 
     snow.update()
 
     # fill the screen with a color to wipe away anything from last frame
     # screen.fill("white")
 
-    for area in areas:
-        area.draw()
-    sun.draw()
-
-    if keys[pygame.K_SPACE]:
+    if add_char:
         i = random.randint(0, len(players) - 1)
         players[i].draw()
 
