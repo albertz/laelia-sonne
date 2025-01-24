@@ -3,7 +3,7 @@ Sonnenschein
 """
 
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Union, Tuple
 import pygame
 import random
 import math
@@ -55,7 +55,7 @@ class Character:
 
 
 class Area:
-    def __init__(self, name: str, pos: pygame.Vector2, size: pygame.Vector2, color: str):
+    def __init__(self, name: str, pos: pygame.Vector2, size: pygame.Vector2, color: Union[str, Tuple[int, int, int]]):
         self.name = name
         self.pos = pos
         self.size = size
@@ -79,7 +79,7 @@ areas = [
         "ground",
         pygame.Vector2(0, screen.get_height() / 2),
         pygame.Vector2(screen.get_width(), screen.get_height() / 2),
-        "white",
+        (150, 75, 0),
     ),
 ]
 
