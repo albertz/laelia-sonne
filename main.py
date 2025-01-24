@@ -2,12 +2,16 @@
 Sonnenschein
 """
 
+from __future__ import annotations
+from typing import Optional
 import pygame
 import random
 import math
 
 # pygame setup
 pygame.init()
+pygame.mixer.init()
+
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
@@ -17,8 +21,10 @@ dt = 0
 class Character:
     Size = 512
 
-    def __init__(self, gfx_path: str):
+    def __init__(self, gfx_path: str, snd_path: Optional[str] = None):
         self.gfx_path = gfx_path
+        self.snd_path = snd_path
+
         self.gfx = pygame.image.load(gfx_path)
         w, h = self.gfx.get_width(), self.gfx.get_height()
         long_side = max(w, h)
@@ -33,6 +39,10 @@ class Character:
                     color = (255, 255, 255, 0)
                 self.gfx.set_at((x, y), color)
 
+        self.snd = None
+        if self.snd_path:
+            self.snd = pygame.mixer.Sound(self.snd_path)
+
     def draw(self):
         pos = get_random_position()
         size = 10 + (pos.y / screen.get_height()) * 300.
@@ -40,6 +50,8 @@ class Character:
         long_side = max(w, h)
         gfx = pygame.transform.smoothscale(self.gfx, (size * w / long_side, size * h / long_side))
         screen.blit(gfx, pos - pygame.Vector2(gfx.get_width() / 2, gfx.get_height() / 2))
+        if self.snd:
+            self.snd.play()
 
 
 class Area:
@@ -56,10 +68,11 @@ class Area:
 
 players = [
     Character("assets/zebra.jpeg"),
-    Character("assets/tiger.jpeg"),
+    Character("assets/tiger.jpeg", "assets/tiger-attack.ogg"),
     Character("assets/giraffe2.jpeg"),
     Character("assets/pferd1.jpeg"),
 ]
+
 areas = [
     Area("sky", pygame.Vector2(0, 0), pygame.Vector2(screen.get_width(), screen.get_height() / 2), "skyblue"),
     Area(
